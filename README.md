@@ -76,6 +76,30 @@ Ci-dessous les variables de définition dans le fichier de configuration yaml ".
 	 fichier_conf = home + "/.acces_db.yml"
 
 - chargement_config(fichier_conf)
+	Accès au fichier yaml
 
-	 DB_BACKUP = config['conf']['backup']['dossier_sauv']
-	 BACKUP_DIR_WEB = config['conf']['backup']['backup_dir_web']
+	DB_BACKUP = config['conf']['backup']['dossier_sauv']
+	BACKUP_DIR_WEB = config['conf']['backup']['backup_dir_web']
+
+- Execution du main avec config en paramètre et traitement des arguments passés à Backup.py
+- Suivant l'action choisie :
+	Sauvegarde de Bases de Donnees MySQL
+	Recherche du répertoire de sauvegarde et création si inexistant
+
+	Restauration des Bases de Donnees MySQL
+
+	Sauvegarder de site web
+	Recherche du répertoire de sauvegarde et création si inexistant
+	Archivage  dans le dossier web de sauvegarde, au format tar, du dossier web situé dans /var/www (paramétrable dans le fichier de conf yaml)
+	Restauration des Sites Web
+
+	Sauvegarde Site Web et Base de Donnees MySQL
+        
+# LICENCE
+"This project is licensed under the terms of the GPLv3 license."
+
+   
+root@debian10:/home/administrateur/Documents/Code/yaml# python3 backup.py /home/administrateur/.acces_db.yml
+
+        
+
