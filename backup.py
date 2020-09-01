@@ -17,12 +17,14 @@ def efface_console() -> None:
     os.system('cls' if os.name == 'nt' else 'clear')
 
 def chargement_config(fichier_conf):
-    if not os.path.exists(fichier_conf):
-        print("Fichier" + fichier_conf + " non trouve")
-    else:
-        with open(fichier_conf, 'r') as ymlfile:
-             config = yaml.load(ymlfile)
-    return config
+	content = {}
+	if not os.path.exists(fichier_conf):
+		print("Fichier" + fichier_conf + " non trouve")
+		exit(1)
+	else:
+		with open(fichier_conf, 'r') as ymlfile:
+			content = yaml.load(ymlfile)
+			return content
 
 def sauvegarde_db(DB_HOST,DB_USER,DB_PASSWORD,DB_NAME,TODAYDATE):
     print ("Debut de la sauvegarde de la base de donnees " + DB_NAME)
@@ -46,14 +48,22 @@ def restaure_db(DB_HOST,DB_USER,DB_PASSWORD,DB_NAME,TODAYDATE) -> None:
 
     print("La sauvegarde '" + fichier_sauvegarde + ".gz' a été restaurée avec succes")
 
-def restaure_www(site,TODAYDATE) -> None:
-	fichier_sauvegarde = str(BACKUP_DIR_WEB) + '/www' + '_' + str(key) + '_' + TODAYDATE + ".tar"
-	print(fichier_sauvegarde)
-	dossier_tar = tarfile.open('/www' + '_' + str(key) + '_' + TODAYDATE +'.tar ')
-	print(dossier_tar)
-	#dossier_tar.extractall('site['sites'][key]['web']['racine']')
-	dossier_tar.close()
-	print("La sauvegarde '" + fichier_sauvegarde + ".tar' a été restaurée avec succes")
+def restaure_www(site,key,TODAYDATE) -> None:
+    for delta in range(5):
+            TODAYDATE = datetime.date.today()-datetime.timedelta(delta)
+            fichier_sauvegarde = str(BACKUP_DIR_WEB) + '/www' + '_' + str(key) + '_' + TODAYDATE.strftime('%Y%m%d') + ".tar"
+            if (os.path.exists(fichier_sauvegarde)):
+                print("La sauvegarde située dans'" + fichier_sauvegarde + "' a été trouvé")
+                dossier_tar = tarfile.open(fichier_sauvegarde)
+                dossier_racine = site['sites'][key]['web']['racine']
+                #print("Restauration du site: " + site['sites'][key]['web']['racine'])
+                print("Restauration du site: ", dossier_racine)
+                #Problème accès root
+                dossier_tar.extractall(dossier_racine)
+                #dossier_tar.extractall('/var/www')
+                #dossier_tar.extractall(BACKUP_DIR_WEB)
+                dossier_tar.close()
+                print("La sauvegarde '" + fichier_sauvegarde + "' a été restaurée avec succes")
 
 def action_choisie(choix, conf_backup, site) -> None:
     efface_console()
@@ -96,19 +106,8 @@ def action_choisie(choix, conf_backup, site) -> None:
 
       elif choix == 4:
         print("Menu > Restauration des Sites Web\n")
-        fichier_sauvegarde = str(BACKUP_DIR_WEB) + '/www' + '_' + str(key) + '_' + TODAYDATE + ".tar"
-        print("La sauvegarde située dans'" + fichier_sauvegarde + "' a été trouvé")
-        dossier_tar = tarfile.open(fichier_sauvegarde)
-        dossier_racine = site['sites'][key]['web']['racine']
-        #print("Restauration du site: " + site['sites'][key]['web']['racine'])
-        print("Restauration du site: ", dossier_racine)
-        #Problème accès root
-        dossier_tar.extractall(dossier_racine)
-
-        #dossier_tar.extractall('/var/www')
-        #dossier_tar.extractall(BACKUP_DIR_WEB)
-        dossier_tar.close()
-        print("La sauvegarde '" + fichier_sauvegarde + "' a été restaurée avec succes")
+        print("Restauration du site: " + site['sites'][key]['web']['racine'])
+        restaure_www(site,key,TODAYDATE)
         print("Restauration terminée!")
 
       elif choix == 5:
@@ -152,16 +151,15 @@ def main(config):
     print ("Nombre d arguments: ", len(sys.argv))
     print ("Les arguments sont: " , str(sys.argv))
 
-    
-    if len(sys.argv) == 2:
-        choix = int(sys.argv[1])
+    if len(sys.argv) == 3:
+        choix = int(sys.argv[2])
         
         if choix > 0 and choix < 6:
             action_choisie(choix, conf_backup, conf_backup)
 
-    if len(sys.argv) == 3:
-        choix = int(sys.argv[1])
-        choix2 = str(sys.argv[2])
+    if len(sys.argv) == 4:
+        choix = int(sys.argv[2])
+        choix2 = str(sys.argv[3])
         
         site = {}
         site['sites'] = {}
@@ -175,7 +173,12 @@ def main(config):
 
 
 home = expanduser("~")
-fichier_conf = home + "/.acces_db.yml"
+#fichier_conf = home + "/.acces_db.yml"
+if len(sys.argv) >= 2:
+    fichier_conf = sys.argv[1]
+else:
+	print("pas de fichier de config fourni, arrt du script")
+	exit(1)
 
 efface_console()
 config = chargement_config(fichier_conf)
