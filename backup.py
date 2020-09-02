@@ -48,6 +48,17 @@ def restaure_db(DB_HOST,DB_USER,DB_PASSWORD,DB_NAME,TODAYDATE) -> None:
 
     print("La sauvegarde '" + fichier_sauvegarde + ".gz' a été restaurée avec succes")
 
+def sauvegarde_www(site,key,TODAYDATE) -> None:
+	print("Compression du dossier web  (/var/www...) du " + str(key) + "...")
+	fichier_sauvegarde = str(BACKUP_DIR_WEB) + '/www' + '_' + str(key) + '_' + TODAYDATE + '.tar'
+	#dossier_racine = site['sites'][key]['web']['racine']
+	os.system('tar -czf '+ config['conf']['backup']['backup_dir_web'] + '/www' + '_' + str(key) + '_' + TODAYDATE +'.tar --absolute-names ' + site['sites'][key]['web']['racine'])
+
+	#os.system('tar -cf '+ fichier_sauvegarde + site['sites'][key]['web']['racine'])
+	#os.system('tar -cf '+ fichier_sauvegarde + site['sites'][key]['web']['racine'])
+	#os.system('tar -cf '+ config['conf']['backup']['backup_dir_web'] + str(key) + '_' + TODAYDATE +'.tar ' + site['sites'][key]['web']['racine'])
+	#print("La sauvegarde de '" + dossier_racine + "' a été effectuée avec succes dans '" + fichier_sauvegarde + "'")
+
 def restaure_www(site,key,TODAYDATE) -> None:
     for delta in range(5):
             TODAYDATE = datetime.date.today()-datetime.timedelta(delta)
@@ -58,10 +69,10 @@ def restaure_www(site,key,TODAYDATE) -> None:
                 dossier_racine = site['sites'][key]['web']['racine']
                 #print("Restauration du site: " + site['sites'][key]['web']['racine'])
                 print("Restauration du site: ", dossier_racine)
-                #Problème accès root
-                dossier_tar.extractall(dossier_racine)
+                
+                #dossier_tar.extractall(dossier_racine)
                 #dossier_tar.extractall('/var/www')
-                #dossier_tar.extractall(BACKUP_DIR_WEB)
+                dossier_tar.extractall(BACKUP_DIR_WEB)
                 dossier_tar.close()
                 print("La sauvegarde '" + fichier_sauvegarde + "' a été restaurée avec succes")
 
@@ -98,11 +109,10 @@ def action_choisie(choix, conf_backup, site) -> None:
         	os.mkdir(BACKUP_DIR_WEB)
         	print("Dossier de Sauvegarde des Sites Web", BACKUP_DIR_WEB , "créé")
 
-        try:
-            print("Compression du dossier web  (/var/www...) du " + str(key) + "...")
-            os.system('tar -cf '+ config['conf']['backup']['backup_dir_web'] + '/www' + '_' + str(key) + '_' + TODAYDATE +'.tar ' + site['sites'][key]['web']['racine'])
-        except OSError as e:
-            print('erreur rencontree avec les fichiers des sites Web',e)
+        print("Sauvegarde du site: ", site['sites'][key]['web']['racine'])
+        print("\n")
+        sauvegarde_www(site,key,TODAYDATE)
+        print("Sauvegarde terminée!")
 
       elif choix == 4:
         print("Menu > Restauration des Sites Web\n")
