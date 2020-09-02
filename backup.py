@@ -89,7 +89,7 @@ def action_choisie(choix, conf_backup, site) -> None:
         	print("Dossier de Sauvegarde des Bases", DB_BACKUP , "trouvé!\n")
         else:
         	os.mkdir(DB_BACKUP)
-        	print("Dossier de Sauvegarde des Bases", DB_BACKUP , "créé")
+        	print("Dossier de Sauvegarde des Bases", DB_BACKUP , "créé!")
 
         print("Sauvegarde de la Base de Donnees: ", site['sites'][key]['mysql']['db'])
         print("\n")
@@ -104,14 +104,13 @@ def action_choisie(choix, conf_backup, site) -> None:
       elif choix == 3:
         print("\nMenu > Sauvegarder de site web\n")
         if os.path.exists(BACKUP_DIR_WEB):
-        	print("Dossier de Sauvegarde des Sites Web", BACKUP_DIR_WEB , "trouvé")
+        	print("Dossier de Sauvegarde des Sites Web", BACKUP_DIR_WEB , "trouvé!")
         else:
         	os.mkdir(BACKUP_DIR_WEB)
-        	print("Dossier de Sauvegarde des Sites Web", BACKUP_DIR_WEB , "créé")
+        	print("Dossier de Sauvegarde des Sites Web", BACKUP_DIR_WEB , "créé!")
 
         print("Sauvegarde du : " + str(key))
         print("Situé dans: ", site['sites'][key]['web']['racine'])
-        print("\n")
         sauvegarde_www(site,key,TODAYDATE)
         print("Sauvegarde terminée!\n")
 
