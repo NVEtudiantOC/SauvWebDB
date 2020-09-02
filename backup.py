@@ -51,13 +51,13 @@ def restaure_db(DB_HOST,DB_USER,DB_PASSWORD,DB_NAME,TODAYDATE) -> None:
 def sauvegarde_www(site,key,TODAYDATE) -> None:
 	print("Compression du dossier web  (/var/www...) du " + str(key) + "...")
 	fichier_sauvegarde = str(BACKUP_DIR_WEB) + '/www' + '_' + str(key) + '_' + TODAYDATE + '.tar'
-	#dossier_racine = site['sites'][key]['web']['racine']
+	dossier_racine = site['sites'][key]['web']['racine']
 	os.system('tar -czf '+ config['conf']['backup']['backup_dir_web'] + '/www' + '_' + str(key) + '_' + TODAYDATE +'.tar --absolute-names ' + site['sites'][key]['web']['racine'])
 
 	#os.system('tar -cf '+ fichier_sauvegarde + site['sites'][key]['web']['racine'])
 	#os.system('tar -cf '+ fichier_sauvegarde + site['sites'][key]['web']['racine'])
 	#os.system('tar -cf '+ config['conf']['backup']['backup_dir_web'] + str(key) + '_' + TODAYDATE +'.tar ' + site['sites'][key]['web']['racine'])
-	#print("La sauvegarde de '" + dossier_racine + "' a été effectuée avec succes dans '" + fichier_sauvegarde + "'")
+	print("La sauvegarde de '" + dossier_racine + "' a été effectuée avec succes dans '" + fichier_sauvegarde + "'")
 
 def restaure_www(site,key,TODAYDATE) -> None:
     for delta in range(5):
@@ -102,17 +102,18 @@ def action_choisie(choix, conf_backup, site) -> None:
         print("Restauration terminée!")
 
       elif choix == 3:
-        print("Menu > Sauvegarder de site web\n")
+        print("\nMenu > Sauvegarder de site web\n")
         if os.path.exists(BACKUP_DIR_WEB):
         	print("Dossier de Sauvegarde des Sites Web", BACKUP_DIR_WEB , "trouvé")
         else:
         	os.mkdir(BACKUP_DIR_WEB)
         	print("Dossier de Sauvegarde des Sites Web", BACKUP_DIR_WEB , "créé")
 
-        print("Sauvegarde du site: ", site['sites'][key]['web']['racine'])
+        print("Sauvegarde du : " + str(key))
+        print("Situé dans: ", site['sites'][key]['web']['racine'])
         print("\n")
         sauvegarde_www(site,key,TODAYDATE)
-        print("Sauvegarde terminée!")
+        print("Sauvegarde terminée!\n")
 
       elif choix == 4:
         print("Menu > Restauration des Sites Web\n")
