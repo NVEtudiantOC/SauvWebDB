@@ -60,21 +60,18 @@ def sauvegarde_www(site,key,TODAYDATE) -> None:
 	print("La sauvegarde de '" + dossier_racine + "' a été effectuée avec succes dans '" + fichier_sauvegarde + "'")
 
 def restaure_www(site,key,TODAYDATE) -> None:
-    for delta in range(5):
-            TODAYDATE = datetime.date.today()-datetime.timedelta(delta)
-            fichier_sauvegarde = str(BACKUP_DIR_WEB) + '/www' + '_' + str(key) + '_' + TODAYDATE.strftime('%Y%m%d') + ".tar"
-            if (os.path.exists(fichier_sauvegarde)):
-                print("La sauvegarde située dans'" + fichier_sauvegarde + "' a été trouvé")
-                dossier_tar = tarfile.open(fichier_sauvegarde)
-                dossier_racine = site['sites'][key]['web']['racine']
-                #print("Restauration du site: " + site['sites'][key]['web']['racine'])
-                print("Restauration du site: ", dossier_racine)
-                
-                #dossier_tar.extractall(dossier_racine)
-                #dossier_tar.extractall('/var/www')
-                dossier_tar.extractall(BACKUP_DIR_WEB)
-                dossier_tar.close()
-                print("La sauvegarde '" + fichier_sauvegarde + "' a été restaurée avec succes")
+    fichier_sauvegarde = str(BACKUP_DIR_WEB) + '/www' + '_' + str(key) + '_' + TODAYDATE + ".tar"
+    print("La sauvegarde située dans'" + fichier_sauvegarde + "' a été trouvé")
+    dossier_tar = tarfile.open(fichier_sauvegarde)
+    dossier_racine = site['sites'][key]['web']['racine']
+    #print("Restauration du site: " + site['sites'][key]['web']['racine'])
+    print("Restauration du site: ", dossier_racine)
+    #Problème accès root
+    dossier_tar.extractall(dossier_racine)
+    #dossier_tar.extractall('/var/www')
+    #dossier_tar.extractall(BACKUP_DIR_WEB)
+    dossier_tar.close()
+    print("La sauvegarde '" + fichier_sauvegarde + "' a été restaurée avec succes")
 
 def action_choisie(choix, conf_backup, site) -> None:
     efface_console()
@@ -116,9 +113,10 @@ def action_choisie(choix, conf_backup, site) -> None:
 
       elif choix == 4:
         print("Menu > Restauration des Sites Web\n")
-        print("Restauration du site: " + site['sites'][key]['web']['racine'])
+        #print("Restauration du site: " + site['sites'][key]['web']['racine'])
+        print("Restauration du site: " + str(key))
         restaure_www(site,key,TODAYDATE)
-        print("Restauration terminée!")
+        print("Restauration terminée!\n")
 
       elif choix == 5:
         print("Menu > Sauvegarde Site Web et Base de Donnees MySQL\n")
