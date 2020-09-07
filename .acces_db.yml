@@ -11,7 +11,7 @@ sites:
       passwd: 123456
       db: test1
     web:
-      racine: /var/www/html
+      racine: /var/www
   site2:
     mysql:
       host: localhost
@@ -19,7 +19,7 @@ sites:
       passwd: 123456
       db: test2
     web:
-      racine: /var/www/html
+      racine: /var/www
   site3:
     mysql:
       host: localhost
@@ -27,5 +27,4 @@ sites:
       passwd: 123456
       db: test3
     web:
-      racine: /var/www/html
-
+      racine: /var/www
