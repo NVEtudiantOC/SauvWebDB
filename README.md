@@ -1,7 +1,8 @@
 # Description:
 Projet de sauvegarde d'un/plusieurs site(s) web(s) fonctionnant sous Apache et MySQL:
-- Sauvegarde automatisée de la base de données MYSQL ainsi que du site web contenu dans le dossier /var/www avec exportation de la sauvegarde dans un dossier local dédié.
-- Possibilité d'effectuer les sauvegardes par lot de plusieurs sites ( à configurer dans le fichier yaml)
+- Sauvegarde automatisée de la base de données MYSQL ainsi que du site web contenu dans le dossier /var/www(configurable) avec exportation de la sauvegarde dans un dossier local dédié.
+- Possibilité d'effectuer les sauvegardes par lot de plusieurs sites à l'aide du menu( à configurer dans le fichier yaml)
+- possibilité de sauvegarde individuel à l'aide d'argument passé en ligne de commande
 
 # Configuration:
  - Web serveur Debian 10, apache2, mysql-server.
@@ -11,36 +12,36 @@ Script Python crée Aout 2020, sur Debian 10 et de python version 2.7.16.
 
 # Prérequis:
 - Script "backup.py"
-- Disposer d'un user et mot de passe root MySQL
-- Positionné dans le répertoire home? le fichier yaml ".acces_db.yml"  et le complété avant lancement du script
+- Disposer d'un user et mot de passe root MySQL pour la bdd et droit root sur la machine debian uniquement pour la restauration site web
+- Positionner dans le répertoire home le fichier yaml ".acces_db.yml"  et renseigner le fichier yaml avant le lancement du script
  
 # Utilisation:
-- Renseigner les variables du fichier yaml en fonction des taches à automatiser
-- Des dossiers de backup de Database et Web sont créés automatiquement
+- Renseigner les variables du fichier yaml en fonction des taches à automatiser pas de limite en nombre de site
+- Des dossiers de backup de Database et Web sont créés automatiquement si inexistant
 
 - le Script s'utilise selon 3 possibilié :
-	- sans argument, en utilisant le menu -> $ python3 backup.py
+	- sans argument, en utilisant le menu -> # python3 backup.py /home/administrateur/.acces_db.yml
+Le menu s'affiche de la manière suivante:
 
 Veuillez saisir le numero correspondant a votre choix :
 
 	[1] => Sauvegarder les bases mysql
 	[2] => Restaurer les bases mysql
 	[3] => Sauvegarder des sites web
-	[4] => Restaurer des sites web
-	[5] => Sauvegarde Site Web et Base de Donnees MySQL
+	[4] => Restaurer des sites web(root)
+	[5] => 
 
 	[6] => Exit
 
-	- en utilisant 1 argument (l'action de sauvegarde/restauration pour la bdd/www des sites présent dans le fichier yaml)
-		-> ex: $ python3 backup.py 1 [1] => Sauvegardera les bases mysql de la liste de tous les sites
+	- en utilisant 1 argument (l'action de sauvegarde/restauration pour la bdd/www des sites présents dans le fichier yaml)
+		-> ex: $ python3 backup.py /home/administrateur/.acces_db.yml 1 [1] => Sauvegardera les bases mysql de la liste de tous les sites présent dans le fichier yaml
 
 	- en utilisant 2 arguments (action argument 1(sauvegarde/restauration bdd/www) + argument 2 définissant le nom du site souhaité)
-		-> ex: $ python3 backup.py 3 site2 => Sauvegarder le site web uniquement pour le site2
+		-> ex: $ python3 backup.py /home/administrateur/.acces_db.yml 3 site2 => Sauvegarder le site web uniquement pour le site2 uniquement
 
 Les fichiers 
-*.tar" (sauvegarde des fichiers du site web) sont sauvegardés sous la forme www_Nom Site_Date du Jour.tar
-et *.sql" (sauvegarde de la base de données mysql) sous la forme DateduJourNomdeBase.sql
-
+*.tar" (sauvegarde des fichiers du site web) sont sauvegardés sous la forme www_Nom Site_Date du Jour.tar dans le répertoire ~/sauvegarde_web
+et *.sql" (sauvegarde de la base de données mysql) sous la forme DateduJourNomdeBase.sql dans le répertoire ~/sauvegarde_db
 
 Ci-dessous les variables de définition dans le fichier de configuration yaml ".acces_db.yml":
 	conf:
@@ -72,9 +73,6 @@ Ci-dessous les variables de définition dans le fichier de configuration yaml ".
  - Affectation de la date à une variable
 	 TODAYDATE
 
- - Affectation de la localisation des fichiers de fonctionnement
-	 fichier_conf = home + "/.acces_db.yml"
-
 - chargement_config(fichier_conf)
 	Accès au fichier yaml
 
@@ -93,13 +91,12 @@ Ci-dessous les variables de définition dans le fichier de configuration yaml ".
 	Archivage  dans le dossier web de sauvegarde, au format tar, du dossier web situé dans /var/www (paramétrable dans le fichier de conf yaml)
 	Restauration des Sites Web
 
-	Sauvegarde Site Web et Base de Donnees MySQL
-        
+
+Gestion des execeptions
+$ echo $?
+exit(0) -> tentavive execution du main
+exit(1) -> pas de fichier yaml
+exit(2) -> sortie menu
+	
 # LICENCE
 "This project is licensed under the terms of the GPLv3 license."
-
-   
-root@debian10:/home/administrateur/Documents/Code/yaml# python3 backup.py /home/administrateur/.acces_db.yml
-
-        
-
