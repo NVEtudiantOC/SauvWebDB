@@ -13,6 +13,8 @@ import tarfile
 
 TODAYDATE = time.strftime('%Y%m%d')
 
+ ##### Fonctions ####
+
 def efface_console() -> None:
     os.system('cls' if os.name == 'nt' else 'clear')
 
@@ -25,6 +27,8 @@ def chargement_config(fichier_conf):
 		with open(fichier_conf, 'r') as ymlfile:
 			content = yaml.load(ymlfile)
 			return content
+
+##### Fonctions sauvegarde et restauration bdd ####
 
 def sauvegarde_db(DB_HOST,DB_USER,DB_PASSWORD,DB_NAME,TODAYDATE):
     print ("Debut de la sauvegarde de la base de donnees " + DB_NAME)
@@ -48,30 +52,41 @@ def restaure_db(DB_HOST,DB_USER,DB_PASSWORD,DB_NAME,TODAYDATE) -> None:
 
     print("La sauvegarde '" + fichier_sauvegarde + ".gz' a été restaurée avec succes")
 
+##### Fonctions sauvegarde et restauration www ####
+
 def sauvegarde_www(site,key,TODAYDATE) -> None:
 	print("Compression du dossier web  (/var/www...) du " + str(key) + "...")
 	fichier_sauvegarde = str(BACKUP_DIR_WEB) + '/www' + '_' + str(key) + '_' + TODAYDATE + '.tar'
 	dossier_racine = site['sites'][key]['web']['racine']
-	os.system('tar -czf '+ config['conf']['backup']['backup_dir_web'] + '/www' + '_' + str(key) + '_' + TODAYDATE +'.tar --absolute-names ' + site['sites'][key]['web']['racine'])
-
+	#os.system('tar --absolute-names -czf '+ config['conf']['backup']['backup_dir_web'] + '/www' + '_' + str(key) + '_' + TODAYDATE +'.tar ' + site['sites'][key]['web']['racine']+ '/')
+	os.system('tar --absolute-names -czf '+ config['conf']['backup']['backup_dir_web'] + '/www' + '_' + str(key) + '_' + TODAYDATE +'.tar ' + site['sites'][key]['web']['racine'])
 	#os.system('tar -cf '+ fichier_sauvegarde + site['sites'][key]['web']['racine'])
 	#os.system('tar -cf '+ fichier_sauvegarde + site['sites'][key]['web']['racine'])
 	#os.system('tar -cf '+ config['conf']['backup']['backup_dir_web'] + str(key) + '_' + TODAYDATE +'.tar ' + site['sites'][key]['web']['racine'])
 	print("La sauvegarde de '" + dossier_racine + "' a été effectuée avec succes dans '" + fichier_sauvegarde + "'")
 
 def restaure_www(site,key,TODAYDATE) -> None:
-    fichier_sauvegarde = str(BACKUP_DIR_WEB) + '/www' + '_' + str(key) + '_' + TODAYDATE + ".tar"
-    print("La sauvegarde située dans'" + fichier_sauvegarde + "' a été trouvé")
-    dossier_tar = tarfile.open(fichier_sauvegarde)
-    dossier_racine = site['sites'][key]['web']['racine']
-    #print("Restauration du site: " + site['sites'][key]['web']['racine'])
-    print("Restauration du site: ", dossier_racine)
-    #Problème accès root
-    dossier_tar.extractall(dossier_racine)
-    #dossier_tar.extractall('/var/www')
-    #dossier_tar.extractall(BACKUP_DIR_WEB)
-    dossier_tar.close()
-    print("La sauvegarde '" + fichier_sauvegarde + "' a été restaurée avec succes")
+	for delta in range(8):
+		TODAYDATE = datetime.date.today()-datetime.timedelta(delta)
+		fichier_sauvegarde = str(BACKUP_DIR_WEB) + '/www' + '_' + str(key) + '_' + str(TODAYDATE.strftime('%Y%m%d')) + ".tar"
+		if os.path.exists(fichier_sauvegarde):
+			dossier_tar = tarfile.open(fichier_sauvegarde)
+			dossier_racine = site['sites'][key]['web']['racine']
+			print("Une sauvegarde située dans'" + BACKUP_DIR_WEB + "' a été trouvé!")
+			print ("La sauvegarde la plus récente est : '" + fichier_sauvegarde + "'")
+			#print("Restauration du site: " + site['sites'][key]['web']['racine'])
+			print("Restauration du site: ", dossier_racine)
+			dossier_tar.extractall(dossier_racine)
+			#dossier_tar.extractall('/var/www')
+			#dossier_tar.extractall(BACKUP_DIR_WEB)
+			dossier_tar.close()
+			print("La sauvegarde '" + fichier_sauvegarde + "' a été restaurée avec succes!")
+			break
+			print("Restauration terminée!")
+		else:
+			print ("Fichier de sauvegarde '" + fichier_sauvegarde + "'à J-" + str(delta) + " n'existe pas!...")
+
+##### Fonction gestion de l'action demandée par l'utilisateur ####
 
 def action_choisie(choix, conf_backup, site) -> None:
     efface_console()
@@ -112,25 +127,17 @@ def action_choisie(choix, conf_backup, site) -> None:
         print("Sauvegarde terminée!\n")
 
       elif choix == 4:
-        print("Menu > Restauration des Sites Web\n")
+        print("Menu > Restauration des Sites Web(root)\n")
         #print("Restauration du site: " + site['sites'][key]['web']['racine'])
-        print("Restauration du site: " + str(key))
+        print("Restauration du site (à 7 jours max): " + str(key))
         restaure_www(site,key,TODAYDATE)
         print("Restauration terminée!\n")
 
       elif choix == 5:
-        print("Menu > Sauvegarde Site Web et Base de Donnees MySQL\n")
-        print("Sauvegarde Base de Donnees MySQL en cours...\n")
-        sauvegarde_db(site['sites'][key]['mysql']['host'],site['sites'][key]['mysql']['user'],site['sites'][key]['mysql']['passwd'],site['sites'][key]['mysql']['db'],TODAYDATE)
-        print("\n")
-        print("Sauvegarde Site web en cours...\n")
-        try:
-            print("Compression du dossier web du " + str(key) + " /var/www ...")
-            os.system('tar -cf '+ config['conf']['backup']['backup_dir_web'] + '/www' + '_' + str(key) + '_' + TODAYDATE +'.tar ' + site['sites'][key]['web']['racine'])
-        except OSError as e:
-            print('erreur rencontree avec les fichiers des sites Web',e)
+        print("Menu > \n")
+        
       elif choix == 6:
-        exit(0)
+        exit(2)
       else:
         menu()
 
@@ -141,8 +148,8 @@ def menu(config):
     print("\n\t[1] => Sauvegarder les bases mysql")
     print("\t[2] => Restaurer les bases mysql")
     print("\t[3] => Sauvegarder des sites web")
-    print("\t[4] => Restaurer des sites web")
-    print("\t[5] => Sauvegarde Site Web et Base de Donnees MySQL")
+    print("\t[4] => Restaurer des sites web(root)")
+    print("\t[5] => ")
     print("\n\t[6] => Exit")
     while True:
         try:
@@ -151,6 +158,8 @@ def menu(config):
         except ValueError:
             sys.stderr.write("{}\nErreur: choix non défini\n\n{}")
     action_choisie(choix, conf_backup, conf_backup)
+
+##### MAIN ####
 
 def main(config):
     conf_backup = config
@@ -185,7 +194,7 @@ home = expanduser("~")
 if len(sys.argv) >= 2:
     fichier_conf = sys.argv[1]
 else:
-	print("pas de fichier de config fourni, arrt du script")
+	print("Pas de fichier de configuration fourni, arrêt du script")
 	exit(1)
 
 efface_console()
