@@ -33,24 +33,39 @@ def chargement_config(fichier_conf):
 def sauvegarde_db(DB_HOST,DB_USER,DB_PASSWORD,DB_NAME,TODAYDATE):
     print ("Debut de la sauvegarde de la base de donnees " + DB_NAME)
     fichier_sauvegarde = str(DB_BACKUP) + TODAYDATE + DB_NAME
-    dumpcmd = "mysqldump -h " + DB_HOST + " -u " + DB_USER + " -p" + str(DB_PASSWORD) + " " + DB_NAME + ' > ' + fichier_sauvegarde + ".sql"
-    os.system(dumpcmd)
-    gzipcmd = "gzip " + fichier_sauvegarde + ".sql"
-    os.system(gzipcmd)
+    #dumpcmd = "mysqldump -h " + DB_HOST + " -u " + DB_USER + " -p" + str(DB_PASSWORD) + " " + DB_NAME + ' > ' + fichier_sauvegarde + ".sql"
+    dumpfile = fichier_sauvegarde + ".sql"
+    tmpfile = open(dumpfile,'w')
+    try:
+    	subprocess.run(["mysqldump","--host=" + DB_HOST, "--user=" + DB_USER, "--password=" + str(DB_PASSWORD), DB_NAME], stdout=tmpfile)
+    	tmpfile.close()
+    	subprocess.run(["gzip", dumpfile])
+    except subprocess.CalledProcessError as e: #Classe de base pour toutes les subprocessexceptions
+    	print('erreur rencontrée lors de la sauvegarde de la base de données',e.output)
+    #gzipcmd = "gzip " + fichier_sauvegarde + ".sql"
     print ("Sauvegarde terminée\n")
-    print ("La sauvegarde a été créée dans le fichier '" + fichier_sauvegarde + ".sql.gz'")
+    print ("La sauvegarde a été créée dans le fichier '" + fichier_sauvegarde + ".sql.gz'\n")
     return(0)
 
 def restaure_db(DB_HOST,DB_USER,DB_PASSWORD,DB_NAME,TODAYDATE) -> None:
-    fichier_sauvegarde = str(DB_BACKUP) + TODAYDATE + DB_NAME + ".sql"
-    unzip = subprocess.Popen(['gzip', '-d', fichier_sauvegarde], stdout=subprocess.PIPE)
-
-    mysqlcmd = ['mysql', '-u', DB_USER, '-p' + str(DB_PASSWORD), '-h', DB_HOST, DB_NAME]
-
-    process = subprocess.Popen(mysqlcmd, stdin=unzip.stdout)
-    process.wait()
-
-    print("La sauvegarde '" + fichier_sauvegarde + ".gz' a été restaurée avec succes")
+	for delta in range(8):
+		TODAYDATE = datetime.date.today()-datetime.timedelta(delta)
+		sauvegarde = str(DB_BACKUP) + str(TODAYDATE.strftime('%Y%m%d')) + DB_NAME + ".sql.gz"
+		if os.path.exists(sauvegarde):
+			print("Une sauvegarde située dans'" + DB_BACKUP + "' a été trouvé!")
+			print ("La sauvegarde la plus récente est : '" + sauvegarde + "'")
+			try:
+				unzip = subprocess.Popen(['gzip', '-d', sauvegarde], stdout=subprocess.PIPE)
+				mysqlcmd = ['mysql', '-u', DB_USER, '-p' + str(DB_PASSWORD), '-h', DB_HOST, DB_NAME]
+				process = subprocess.Popen(mysqlcmd, stdin=unzip.stdout)
+				process.wait()				
+				print("La sauvegarde '" + sauvegarde + "' a été restaurée avec succes!\n")
+				break
+				print("Restauration terminée!")
+			except subprocess.CalledProcessError as e: #Classe de base pour toutes les subprocessexceptions
+				print('erreur rencontrée lors de la sauvegarde de la base de données',e.output)			
+		else:
+			print ("Fichier de sauvegarde '" + sauvegarde + "'à J-" + str(delta) + " n'existe pas!...")
 
 ##### Fonctions sauvegarde et restauration www ####
 
@@ -58,29 +73,37 @@ def sauvegarde_www(site,key,TODAYDATE) -> None:
 	print("Compression du dossier web  (/var/www...) du " + str(key) + "...")
 	fichier_sauvegarde = str(BACKUP_DIR_WEB) + '/www' + '_' + str(key) + '_' + TODAYDATE + '.tar'
 	dossier_racine = site['sites'][key]['web']['racine']
-	#os.system('tar --absolute-names -czf '+ config['conf']['backup']['backup_dir_web'] + '/www' + '_' + str(key) + '_' + TODAYDATE +'.tar ' + site['sites'][key]['web']['racine']+ '/')
-	os.system('tar --absolute-names -czf '+ config['conf']['backup']['backup_dir_web'] + '/www' + '_' + str(key) + '_' + TODAYDATE +'.tar ' + site['sites'][key]['web']['racine'])
-	#os.system('tar -cf '+ fichier_sauvegarde + site['sites'][key]['web']['racine'])
-	#os.system('tar -cf '+ fichier_sauvegarde + site['sites'][key]['web']['racine'])
-	#os.system('tar -cf '+ config['conf']['backup']['backup_dir_web'] + str(key) + '_' + TODAYDATE +'.tar ' + site['sites'][key]['web']['racine'])
-	print("La sauvegarde de '" + dossier_racine + "' a été effectuée avec succes dans '" + fichier_sauvegarde + "'")
+	#os.system('tar --absolute-names -czf '+ config['conf']['backup']['backup_dir_web'] + '/www' + '_' + str(key) + '_' + TODAYDATE +'.tar ' + site['sites'][key]['web']['racine'])
+	try:
+		print("Compression du dossier: ", dossier_racine)
+		dossier_tar = tarfile.open(fichier_sauvegarde, 'w')
+		dossier_tar.add(dossier_racine)
+		dossier_tar.close()
+		#os.system('tar -cf '+ fichier_sauvegarde + site['sites'][key]['web']['racine'])
+		#os.system('tar -cf '+ config['conf']['backup']['backup_dir_web'] + str(key) + '_' + TODAYDATE +'.tar ' + site['sites'][key]['web']['racine'])
+		print("La sauvegarde de '" + dossier_racine + "' a été effectuée avec succes dans '" + fichier_sauvegarde + "'")
+	except tarfile.TarError as e: #Classe de base pour toutes les tarfileexceptions
+		print('Erreur rencontrée lors de la sauvegarde des fichiers du site Web',e)
 
 def restaure_www(site,key,TODAYDATE) -> None:
 	for delta in range(8):
 		TODAYDATE = datetime.date.today()-datetime.timedelta(delta)
 		fichier_sauvegarde = str(BACKUP_DIR_WEB) + '/www' + '_' + str(key) + '_' + str(TODAYDATE.strftime('%Y%m%d')) + ".tar"
 		if os.path.exists(fichier_sauvegarde):
-			dossier_tar = tarfile.open(fichier_sauvegarde)
-			dossier_racine = site['sites'][key]['web']['racine']
-			print("Une sauvegarde située dans'" + BACKUP_DIR_WEB + "' a été trouvé!")
-			print ("La sauvegarde la plus récente est : '" + fichier_sauvegarde + "'")
-			#print("Restauration du site: " + site['sites'][key]['web']['racine'])
-			print("Restauration du site: ", dossier_racine)
-			dossier_tar.extractall(dossier_racine)
-			#dossier_tar.extractall('/var/www')
-			#dossier_tar.extractall(BACKUP_DIR_WEB)
-			dossier_tar.close()
-			print("La sauvegarde '" + fichier_sauvegarde + "' a été restaurée avec succes!")
+			try:
+				dossier_tar = tarfile.open(fichier_sauvegarde)
+				dossier_racine = site['sites'][key]['web']['racine']
+				print("Une sauvegarde située dans'" + BACKUP_DIR_WEB + "' a été trouvé!")
+				print ("La sauvegarde la plus récente est : '" + fichier_sauvegarde + "'")
+				#print("Restauration du site: " + site['sites'][key]['web']['racine'])
+				print("Restauration du site: ", dossier_racine)
+				dossier_tar.extractall('/')
+				#dossier_tar.extractall('/var/www')
+				#dossier_tar.extractall(BACKUP_DIR_WEB)
+				dossier_tar.close()
+				print("La sauvegarde '" + fichier_sauvegarde + "' a été restaurée avec succes!")
+			except tarfile.TarError as e: #Classe de base pour toutes les tarfileexceptions
+				print('Erreur rencontrée lors de la restauration des fichiers du site Web',e)
 			break
 			print("Restauration terminée!")
 		else:
@@ -93,7 +116,7 @@ def action_choisie(choix, conf_backup, site) -> None:
     config = conf_backup
     print("Clés dontenues dans le dictionnaire: ", site['sites'].keys())
     for key in site['sites'].keys():
-      print("La clé " + str(key) + " contient: ", site['sites'][key])
+      print("\nLa clé " + str(key) + " contient: ", site['sites'][key])
       #print(site['sites'][key])
       if choix == 1:
         print("\nMenu > Sauvegarde de Bases de Donnees MySQL\n")
@@ -104,12 +127,11 @@ def action_choisie(choix, conf_backup, site) -> None:
         	print("Dossier de Sauvegarde des Bases", DB_BACKUP , "créé!")
 
         print("Sauvegarde de la Base de Donnees: ", site['sites'][key]['mysql']['db'])
-        print("\n")
         sauvegarde_db(site['sites'][key]['mysql']['host'],site['sites'][key]['mysql']['user'],site['sites'][key]['mysql']['passwd'],site['sites'][key]['mysql']['db'],TODAYDATE)
 
       elif choix == 2:
         print("Menu > Restauration des Bases de Donnees MySQL\n")
-        print("Restauration de la Base de Donnees: ", site['sites'][key]['mysql']['db'])
+        print("Restauration de la Base de Donnees: ", site['sites'][key]['mysql']['db'], "(à 7 jours max)")
         restaure_db(site['sites'][key]['mysql']['host'],site['sites'][key]['mysql']['user'],site['sites'][key]['mysql']['passwd'],site['sites'][key]['mysql']['db'],TODAYDATE)
         print("Restauration terminée!")
 
