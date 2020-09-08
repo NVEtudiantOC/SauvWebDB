@@ -8,7 +8,7 @@ Projet de sauvegarde d'un/plusieurs site(s) web(s) fonctionnant sous Apache et M
  - Web serveur Debian 10, apache2, mysql-server.
 
 # Développement:
-Script Python crée Aout 2020, sur Debian 10 et de python version 2.7.16.
+Script Python crée Aout 2020, sur Debian 10 et python version 2.7.16.
 
 # Prérequis:
 - Script "backup.py"
