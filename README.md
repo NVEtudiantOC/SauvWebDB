@@ -8,7 +8,7 @@ Projet de sauvegarde d'un/plusieurs site(s) web(s) fonctionnant sous Apache et M
  - Web serveur Debian 10, apache2, mysql-server.
 
 # Développement:
-Script Python crée Aout 2020, sur Debian 10 et python 2.7.16
+Script Python crée Aout 2020, sur Debian 10 et python 2.7.16 et python3 3.7.3
 
 # Prérequis:
 - Installer pip
@@ -16,7 +16,7 @@ Pip est un système de gestion de paquets utilisé pour installer et gérer des 
 Pip empêche les installations partielles en annonçant toutes les exigences avant l'installation.
 	Pour installer pip il vous faudra exécuter la commande :
 	sudo apt-get install python-pip
-	Et pour python 3 :
+	Et pour python3 :
 	sudo apt-get install python3-pip
 
 - Installer YAML
