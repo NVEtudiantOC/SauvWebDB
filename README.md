@@ -8,12 +8,33 @@ Projet de sauvegarde d'un/plusieurs site(s) web(s) fonctionnant sous Apache et M
  - Web serveur Debian 10, apache2, mysql-server.
 
 # Développement:
-Script Python crée Aout 2020, sur Debian 10 et python version 2.7.16.
+Script Python crée Aout 2020, sur Debian 10 et python3 version 3.8.5
 
 # Prérequis:
+- Installer pip
+Pip est un système de gestion de paquets utilisé pour installer et gérer des librairies écrites en Python .
+Pip empêche les installations partielles en annonçant toutes les exigences avant l'installation.
+	Pour installer pip il vous faudra exécuter la commande :
+	sudo apt-get install python-pip
+	Et pour python 3 :
+	sudo apt-get install python3-pip
+
+- Installer YAML
+YAML (YAML Ain't Markup Language) est un langage de sérialisation de données lisible par l'homme.
+Il est couramment utilisé pour les fichiers de configuration.
+YAML prend en charge nativement 3 types de données de base: les scalaires (tels que les chaînes, les entiers et les flottants), les listes et les tableaux associatifs.
+L'extension de nom de fichier officielle recommandée pour les fichiers YAML a été .yaml.
+Il existe deux modules en Python pour YAML: PyYAML et ruamel.yaml.
+
+- Dans ce script, nous utilisons le module pyyaml
+PyYAML est un analyseur et un émetteur YAML pour Python, le module est installé avec pip.
+$ pip install pyyaml
+
 - Script "backup.py"
-- Disposer d'un user et mot de passe root MySQL pour la bdd et droit root sur la machine debian uniquement pour la restauration site web
-- Positionner dans le répertoire home le fichier yaml ".acces_db.yml"  et renseigner le fichier yaml avant le lancement du script
+
+- Disposer d'un user et mot de passe root MySQL pour la bdd et d'un user root sur la machine debian uniquement pour le choix(4) :la restauration site web
+
+- Positionner dans le répertoire home le fichier yaml ".acces_db.yml"  et renseigner le fichier yaml(comme dans le fichier exemple ".acces_db.yml" mis à disposition) avant le lancement du script
  
 # Utilisation:
 - Renseigner les variables du fichier yaml en fonction des taches à automatiser pas de limite en nombre de site
