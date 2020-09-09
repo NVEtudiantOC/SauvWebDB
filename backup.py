@@ -25,7 +25,7 @@ def chargement_config(fichier_conf):
 		exit(1)
 	else:
 		with open(fichier_conf, 'r') as ymlfile:
-			content = yaml.load(ymlfile)
+			content = yaml.load(ymlfile, Loader=yaml.BaseLoader)
 			return content
 
 ##### Fonctions sauvegarde et restauration bdd ####
