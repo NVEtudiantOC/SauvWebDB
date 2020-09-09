@@ -28,7 +28,7 @@ Il existe deux modules en Python pour YAML: PyYAML et ruamel.yaml.
 
 - Dans ce script, nous utilisons le module pyyaml
 PyYAML est un analyseur et un émetteur YAML pour Python, le module est installé avec pip.
-$ pip install pyyaml
+$ pip3 install pyyaml
 
 - Script "backup.py"
 
