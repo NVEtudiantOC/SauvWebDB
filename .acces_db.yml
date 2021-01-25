@@ -2,14 +2,15 @@ conf:
   backup:
     dossier_sauv: /home/administrateur/sauvegarde_db
     backup_dir_web: /home/administrateur/sauvegarde_web
-
+    retention: 7
+    ip_sauv_dist: 192.168.0.3
 sites:
   site1:
     mysql:
       host: localhost
-      user: root
+      user: administrateur
       passwd: 123456
-      db: test1
+      db: wordpress
     web:
       racine: /var/www
   site2:
